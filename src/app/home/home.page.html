@@ -7,28 +7,25 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-button color="primary" (click)="addMode()">
+    <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+    Add
+  </ion-button>
+  <form (ngSubmit)="onSubmit()" [formGroup]="formGroup">
+    <ion-item class="styled-input">
+      <ion-input
+        formControlName="name"
+        label="Name"
+        label-placement="stacked"
+        type="text"
+        placeholder="Nombre de la persona">
+      </ion-input>
+    </ion-item>
 
-  @if(mode == "new"){
-    <form (ngSubmit)="onSubmit()" [formGroup]="formGroup" >
-      <ion-item class="styled-input">
-        <ion-input
-         formControlName="name"
-          label="Name"
-          label-placement="stacked"
-          type="text"
-          placeholder="Name">
-        </ion-input>
-      </ion-item>
-
-      <ion-button expand="block" type="submit" class="submit-btn">
-        enviar
-      </ion-button>
-
-    </form>
-  }
-  @else {
-
-  }
+    <ion-button expand="block" type="submit" class="submit-btn" [disabled]="formGroup.invalid">
+      {{ mode === 'new' ? 'Agregar' : 'Actualizar' }}
+    </ion-button>
+  </form>
   <!-- Grid de Cartas -->
   <ion-grid>
     <ion-row>
@@ -38,6 +35,10 @@
           <div class="button-container" >
             <ion-button color="danger" (click)="deletePersona(persona); $event.stopPropagation()">
               <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button color="warning" (click)="editMode(persona)">
+              <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+              
             </ion-button>
           </div>
         </ion-card>

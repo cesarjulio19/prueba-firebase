@@ -22,6 +22,7 @@ export class HomePage implements OnInit{
   _personas:BehaviorSubject<Persona[]> = new BehaviorSubject<Persona[]>([]);
   personas$:Observable<Persona[]> = this._personas.asObservable();
   private collectionName = 'personas';
+  idpersona: any
 
   formGroup: FormGroup;
 
@@ -50,28 +51,40 @@ export class HomePage implements OnInit{
 
 
   addPersona( newPersona: Persona) {
-    this.firebaseService.add(this.collectionName, newPersona).subscribe(() => {
-      next: (response: Persona) =>{
-        this._personas.next([...this._personas.value, response])
-      }
+    this.firebaseService.add(this.collectionName, newPersona).subscribe((data) => {
+
+        this._personas.next([...this._personas.value, data])
+      
       
     });
   }
 
-  updatePersona(persona: Persona) {
-    if (persona.id) {
-      this.firebaseService
-        .update(this.collectionName, persona.id, persona)
-        .subscribe(() => {
-          this.loadPerson()
-        });
-    }
+  updatePersona(id: string, persona: Partial<Persona>) {
+    this.firebaseService.update(this.collectionName, id, persona).subscribe(() => {
+      this.loadPerson();
+    });
   }
 
   deletePersona(persona: Persona) {
     if (persona.id) {
       this.firebaseService.delete(this.collectionName, persona.id).subscribe(() => {
         this.loadPerson()
+      });
+    }
+  }
+
+  addMode(){
+    this.mode = 'new'
+  }
+
+  editMode(persona: Persona) {
+    if (persona.id) {
+      this.idpersona = persona.id;
+      this.mode = 'edit';
+
+      // Rellena el formulario con los datos de la persona seleccionada
+      this.formGroup.patchValue({
+        name: persona.name,
       });
     }
   }
@@ -87,13 +100,15 @@ export class HomePage implements OnInit{
 
     if (this.mode === 'new') {
       this.addPersona(formData);
-    } else {
-      // Actualización: Aquí podrías pasar el ID si estás editando
+    } else if(this.mode === 'edit' && this.idpersona){
+      const updatedPersona: Persona = { ...formData, id: this.idpersona };
+      this.updatePersona(this.idpersona, formData);
     }
 
     // Limpia el formulario y cambia a modo 'new'
     this.formGroup.reset();
     this.mode = 'new';
+    this.idpersona = undefined;
   }
 
   
